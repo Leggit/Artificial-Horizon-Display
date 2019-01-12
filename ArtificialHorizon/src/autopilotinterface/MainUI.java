@@ -22,12 +22,13 @@ import javax.swing.JPanel;
  * @author Oliver
  */
 public class MainUI extends javax.swing.JFrame {
+
     //constants to set the size of the AH display
     final int HORIZON_WIDTH = 240;
     final int HORIZON_HEIGHT = 300;
-    
+
     //important that the comminication is really fast - 9600B wont work for sure
-    final int BAUD_RATE = 115200;//This may be why it does not work for you!
+    int baudRate;//This may be why it does not work for you!
 
     SerialPort chosenPort;//must be accessible throughout the program 
 
@@ -59,6 +60,7 @@ public class MainUI extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         baudRateErrLbl = new javax.swing.JLabel();
         typeErrLbl = new javax.swing.JLabel();
+        baudRateCmb = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -82,6 +84,7 @@ public class MainUI extends javax.swing.JFrame {
         );
 
         portsSpn.setModel(new javax.swing.SpinnerListModel(new String[] {"Item 0", "Item 1", "Item 2", "Item 3"}));
+        portsSpn.setToolTipText("Select COM port");
 
         connectBtn.setFont(new java.awt.Font("Consolas", 0, 14)); // NOI18N
         connectBtn.setText("Connect");
@@ -102,10 +105,13 @@ public class MainUI extends javax.swing.JFrame {
         jLabel3.setText("Angles are coming through in the form 'roll, pitch'");
 
         baudRateErrLbl.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
-        baudRateErrLbl.setText("Baud rate must be 115200!");
+        baudRateErrLbl.setText("The baud rates match");
 
         typeErrLbl.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
         typeErrLbl.setText("Angles are Integers");
+
+        baudRateCmb.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "115200", "57600" }));
+        baudRateCmb.setToolTipText("Select Baud Rate");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -117,15 +123,16 @@ public class MainUI extends javax.swing.JFrame {
                     .addComponent(telementryPnl, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(typeErrLbl)
                             .addComponent(jLabel1)
                             .addComponent(portErrLbl)
                             .addComponent(jLabel3)
-                            .addComponent(typeErrLbl)
                             .addComponent(baudRateErrLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 71, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(connectBtn, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(portsSpn, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 78, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(portsSpn, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(baudRateCmb, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(connectBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 96, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -136,9 +143,11 @@ public class MainUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(connectBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(portsSpn, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(portsSpn, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(baudRateCmb, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(connectBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -149,40 +158,41 @@ public class MainUI extends javax.swing.JFrame {
                         .addComponent(typeErrLbl)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(baudRateErrLbl)))
-                .addContainerGap(38, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     /**
-     * uses the boolean 'connected' to either try to connect to the port shown on
-     * the spinner or disconnect and reset everything so that the user can
-     * choose a different 
+     * uses the boolean 'connected' to either try to connect to the port shown
+     * on the spinner or disconnect and reset everything so that the user can
+     * choose a different
      *
      * @param evt
      */
     private void connectBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectBtnActionPerformed
         int answer;//holds the answer given by the user when asked to confirm they want to disconnect 
-        
+
         if (connected == false) {//if not connected with a particular port
 
             chosenPort = SerialPort.getCommPort(portsSpn.getValue().toString());//find the port shown on the spinner 
+            baudRate = Integer.parseInt(baudRateCmb.getItemAt(baudRateCmb.getSelectedIndex()));
 
             if (chosenPort.openPort()) {
                 JOptionPane.showMessageDialog(null, "Connected");//notify user of successful connection
                 chosenPort.setComPortTimeouts(SerialPort.TIMEOUT_SCANNER, 0, 0);//set the connection mode
-                chosenPort.setBaudRate(BAUD_RATE);
-                
+                chosenPort.setBaudRate(baudRate);
+
                 //flips
                 connected = true;
                 connectBtn.setText("Diconnect");
                 connectBtn.setBackground(Color.gray);
                 portErrLbl.setForeground(Color.black);
                 portsSpn.setEnabled(false);
-                
+
                 displayData();//go into the main loop 
-                
+
             } else {//if it does not connect 
                 JOptionPane.showMessageDialog(null, "Failed to connect");
                 populateSpinner();//it may be that the situation has changed (eg something may have been unplugged)
@@ -242,9 +252,9 @@ public class MainUI extends javax.swing.JFrame {
 
     public void artificialHorizon(int roll, int pitch, JPanel panel) {
         Graphics g = panel.getGraphics();
-        
+
         //get the AH to display in the middle of the panel
-        int cornerX = panel.getWidth()/2 - HORIZON_WIDTH/2;
+        int cornerX = panel.getWidth() / 2 - HORIZON_WIDTH / 2;
         int cornerY = panel.getHeight() / 2 - HORIZON_HEIGHT / 2;
 
         //work out the y co-ordinates
@@ -292,49 +302,58 @@ public class MainUI extends javax.swing.JFrame {
         g.drawPolyline(lineX, lineY, 5);
 
     }
-   
+
     /**
-     * Creates and runs a Thread containing a while loop that will keep on reading in new serial data - 
-     *  - and updating the display accordingly
+     * Creates and runs a Thread containing a while loop that will keep on
+     * reading in new serial data - - and updating the display accordingly
      */
-    public void displayData(){
-       //System.out.println("displaying data");
-       Thread thread = new Thread() {
-       @Override
-       public void run() {
+    public void displayData() {
+
+        //System.out.println("displaying data");
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                
+                String[] line;//stores the data just read in
+                int answer;//stores the users repsonse to an error
+                
                 try (Scanner scanner = new Scanner(chosenPort.getInputStream())) {
                     while (scanner.hasNextLine()) {//while data is still coming in 
                         //System.out.println("loop");//sometimes useful to know where we are in the run of the program
-                        
-                        String[] line = scanner.nextLine().split(",");//read in new line of serial data
-                        
+
+                        line = scanner.nextLine().split(",");//read in new line of serial data
+
                         try {
                             artificialHorizon(Integer.parseInt(line[0]), Integer.parseInt(line[1]), telementryPnl);//update the display
                             typeErrLbl.setForeground(Color.black);//no problems with data coming in 
-                        } catch (Exception e) {
+                        } catch (NumberFormatException e) {
                             //notify the user there is a number format exception
                             typeErrLbl.setForeground(Color.red);
-                            
+
                             //ask the user if they want the program to close the program
-                            int answer;
-                            answer = JOptionPane.showConfirmDialog(null, "Problem - Do you want to exit?",null, JOptionPane.YES_NO_OPTION);
-                            if(answer == JOptionPane.YES_OPTION)System.exit(0); 
+                            
+                            answer = JOptionPane.showConfirmDialog(null, "Problem - Do you want to exit continue trying?", null, JOptionPane.YES_NO_OPTION);
+                            if (answer == JOptionPane.YES_OPTION) {
+                                System.exit(0);
+                            }
                         }
                     }
-                }catch(Exception e){
+                } catch (Exception e) {
                     System.out.println(e);//useful for debugging
-                    
+
                     //ask the user if they want the program to close the program
-                    int choice;
-                    choice = JOptionPane.showConfirmDialog(null,"Try again?", "Problem reading data from serial port", JOptionPane.YES_NO_OPTION);
-                    if(choice == JOptionPane.YES_OPTION)displayData();
                     
+                    answer = JOptionPane.showConfirmDialog(null, "Try again?", "Problem reading data from serial port", JOptionPane.YES_NO_OPTION);
+                    if (answer == JOptionPane.YES_OPTION) {
+                        displayData();
+                    }
+
                 }
             }
         };
         thread.start();
     }
-    
+
     /**
      * @param args the command line arguments
      */
@@ -371,6 +390,7 @@ public class MainUI extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox<String> baudRateCmb;
     private javax.swing.JLabel baudRateErrLbl;
     private javax.swing.JButton connectBtn;
     private javax.swing.JLabel jLabel1;
